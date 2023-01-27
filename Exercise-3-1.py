@@ -46,15 +46,15 @@ for i in range(data['job_count']):
 # Subject to
 for i in range(data['job_count']):
     for j in range(data['job_count']):
-        solver.Add(i < j)
-
-        # if i < j:
-        #     solver.Add( Big_M * (1 - x[i,j]) +  c[j] >= c[j] + data['process'][j])
+        # solver.Add(i < j)
+        if i< j:
+            solver.Add( Big_M * (1 - x[(i,j)]) +  c[j] >= c[j] + data['process'][j])
+            solver.Add( Big_M * x[(i,j)] +  c[i] >= c[j] + data['process'][i])
 
 
 # # c_j >= p_j
-# for j in range(data['job_count']):
-#     solver.Add(c[j] >= data['process'][j])
+for j in range(data['job_count']):
+    solver.Add(c[j] >= data['process'][j])
 
 # # c_max >= c_j
 # for j in range(data['job_count']):
@@ -80,11 +80,17 @@ status = solver.Solve()
 
 if status == pywraplp.Solver.OPTIMAL:
     print('Objective value =', solver.Objective().Value())
+    c_j = []
     for i in range(data['job_count']):
-        for j in range(data['job_count']):
-            if i < j:
-                print(x[i,j].name(), ' = ', x[i,j].solution_value())
-                print(c[i].name(), ' = ', x[i,j].solution_value())
+        # print(c[i].name(), ' = ', c[i].solution_value())
+        c_j.append(c[i].solution_value())
+
+        # for j in range(data['job_count']):
+            # if i < j:
+            # print(x[i,j].name(), ' = ', x[i,j].solution_value())
+    print(data['process'])
+    print(c_j)
+        # print(c[i].name(), ' = ', c[i].solution_value())
 
     # print()
     # print('Problem solved in %f milliseconds' % solver.wall_time())
