@@ -1,6 +1,7 @@
 from ortools.linear_solver import pywraplp
 import numpy as np
 
+
 solver = pywraplp.Solver.CreateSolver('SCIP')
 if not solver:
     print("solver doesn't exist")
@@ -48,9 +49,10 @@ for i in range(data['job_count']):
             solver.Add( Big_M * x[(i,j)] +  c[i] >= c[j] + data['process'][i])
 
 
-# # c_j >= p_j
+# c_j >= p_j
 for j in range(data['job_count']):
     solver.Add(c[j] >= data['process'][j])
+
 
 # Objective Function
 objective = solver.Objective()
@@ -74,6 +76,7 @@ if status == pywraplp.Solver.OPTIMAL:
         c_j = np.append(c_j, c[i].solution_value())
         for j in range(data['job_count']):
             if i<j:
+                # print(x[(i,j)].name(), ' = ', x[(i,j)].solution_value())
                 i_index = sorted_list.index(i)
                 j_index = sorted_list.index(j)
                 if ( x[(i,j)].solution_value() == 0 ) & (i_index > j_index):
@@ -85,15 +88,16 @@ if status == pywraplp.Solver.OPTIMAL:
                     j_value = sorted_list[j_index]
                     sorted_list[i_index] = j_value
                     sorted_list[j_index] = i_value
-                    
+    
     print('process time : ', data['process'])
     print('weight : ', data['weight'])
     print('completion time : ', c_j)
+    print('C_max : ', max(c_j))
     print()
     print('process time : ', np.array(data['process'])[sorted_list])
     print('completion time : ', c_j[sorted_list])
     start_time = c_j - data['process']
-    print('start_time : ', start_time)
+    print('start_time : ', start_time[sorted_list])
 
     # print()
     # print('Problem solved in %f milliseconds' % solver.wall_time())
@@ -103,19 +107,27 @@ else:
     print('The problem does not have an optimal solution.')
 
 
-# https://plotly.com/python/gantt/
-import plotly.figure_factory as ff
+# # https://plotly.com/python/gantt/
+# import plotly.figure_factory as ff
 
-# df에 start랑 finish에는 float 적용 안됨! int로 변형 시켜야 함
-start_time = start_time.astype(np.int64)
-c_j = c_j.astype(np.int64)
+# # df에 start랑 finish에는 float 적용 안됨! int로 변형 시켜야 함
+# start_time = start_time.astype(np.int64)
+# c_j = c_j.astype(np.int64)
 
-job_name = []
-df = []
-for j in range(data['job_count']):
-    job_name.append('job {number}'.format(number = j + 1))
-    df.append(dict(Task = job_name[j], Start=start_time[j], Finish=c_j[j]))
+# job_name = []
+# df = []
+# for j in range(data['job_count']):
+#     job_name.append('job {number}'.format(number = j + 1))
+#     # df.append(dict(Task = job_name[j], Start=start_time[j], Finish=c_j[j]))
+#     df.append(dict(Task = 'Machine 1', Subtask= job_name[j], Start=start_time[j], Finish=c_j[j]))
 
-fig = ff.create_gantt(df, show_colorbar=True)
-fig.update_layout(xaxis_type='linear')
-fig.show()
+# # https://community.plotly.com/t/gantt-chart-resolve-overlap-in-grouped-tasks/38221
+# # 그룹으로 묶어주기 (Machine 1으로) : group_tasks = True  
+# fig = ff.create_gantt(df, index_col = 'Subtask', show_colorbar=True, bar_width=0.2, group_tasks= True)
+# fig.update_layout(xaxis_type='linear')
+
+# # 투명도
+# for shape in fig['data']:
+#     shape['opacity'] = 0.6
+
+# fig.show()
