@@ -52,13 +52,6 @@ for i in range(data['job_count']):
 for j in range(data['job_count']):
     solver.Add(c[j] >= data['process'][j])
 
-# # c_max >= c_j
-# for j in range(data['job_count']):
-#     solver.Add(c_max >= c[j])
-    
-# solver.Add(c_max >= sum(data['process']))
-
-
 # Objective Function
 objective = solver.Objective()
 for j in range(data['job_count']):
@@ -88,19 +81,11 @@ if status == pywraplp.Solver.OPTIMAL:
                 elif ( x[(i,j)].solution_value() == 1 ) & (i_index < j_index):
                     pass
                 else:
-                    # print('sorted_list.index(i) : ', i_index)
-                    # print('sorted_list.index(j) : ',j_index)
                     i_value = sorted_list[i_index]
                     j_value = sorted_list[j_index]
                     sorted_list[i_index] = j_value
                     sorted_list[j_index] = i_value
                     
-
-        # print('sorted_list : ', sorted_list)                
-                # print(x[(i,j)].name(), ' = ', x[(i,j)].solution_value())
-
-    # completion_time_sort_index = np.argsort(c_j)
-    # sorted_completion_time = c_j.sort()
     print('process time : ', data['process'])
     print('weight : ', data['weight'])
     print('completion time : ', c_j)
@@ -109,8 +94,7 @@ if status == pywraplp.Solver.OPTIMAL:
     print('completion time : ', c_j[sorted_list])
     start_time = c_j - data['process']
     print('start_time : ', start_time)
-    # print('sorted list : ' , sorted_list)
-    
+
     # print()
     # print('Problem solved in %f milliseconds' % solver.wall_time())
     # print('Problem solved in %d iterations' % solver.iterations())
@@ -120,7 +104,6 @@ else:
 
 
 # https://plotly.com/python/gantt/
-
 import plotly.figure_factory as ff
 
 # df에 start랑 finish에는 float 적용 안됨! int로 변형 시켜야 함
