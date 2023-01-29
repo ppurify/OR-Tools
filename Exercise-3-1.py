@@ -39,8 +39,6 @@ infinity = solver.infinity()
 for i in range(data['job_count']):
     c[i] = solver.IntVar(0, infinity, 'c_%i' % i)
 
-# c_max = solver.IntVar(0, infinity, 'C_max')
-
 # Subject to
 for i in range(data['job_count']):
     for j in range(data['job_count']):
@@ -84,15 +82,18 @@ if status == pywraplp.Solver.OPTIMAL:
                 elif ( x[(i,j)].solution_value() == 1 ) & (i_index < j_index):
                     pass
                 else:
-                    i_value = sorted_list[i_index]
-                    j_value = sorted_list[j_index]
-                    sorted_list[i_index] = j_value
-                    sorted_list[j_index] = i_value
-    
+                    sorted_list[i_index], sorted_list[j_index] = sorted_list[j_index], sorted_list[i_index]
+                    # i_value = sorted_list[i_index]
+                    # j_value = sorted_list[j_index]
+                    # sorted_list[i_index] = j_value
+                    # sorted_list[j_index] = i_value
+                    
+
     print('process time : ', data['process'])
     print('weight : ', data['weight'])
     print('completion time : ', c_j)
     print('C_max : ', max(c_j))
+    
     print()
     print('process time : ', np.array(data['process'])[sorted_list])
     print('completion time : ', c_j[sorted_list])
@@ -107,27 +108,27 @@ else:
     print('The problem does not have an optimal solution.')
 
 
-# # https://plotly.com/python/gantt/
-# import plotly.figure_factory as ff
+# https://plotly.com/python/gantt/
+import plotly.figure_factory as ff
 
-# # df에 start랑 finish에는 float 적용 안됨! int로 변형 시켜야 함
-# start_time = start_time.astype(np.int64)
-# c_j = c_j.astype(np.int64)
+# df에 start랑 finish에는 float 적용 안됨! int로 변형 시켜야 함
+start_time = start_time.astype(np.int64)
+c_j = c_j.astype(np.int64)
 
-# job_name = []
-# df = []
-# for j in range(data['job_count']):
-#     job_name.append('job {number}'.format(number = j + 1))
-#     # df.append(dict(Task = job_name[j], Start=start_time[j], Finish=c_j[j]))
-#     df.append(dict(Task = 'Machine 1', Subtask= job_name[j], Start=start_time[j], Finish=c_j[j]))
+job_name = []
+df = []
+for j in range(data['job_count']):
+    job_name.append('job {number}'.format(number = j + 1))
+    # df.append(dict(Task = job_name[j], Start=start_time[j], Finish=c_j[j]))
+    df.append(dict(Task = 'Machine 1', Subtask= job_name[j], Start=start_time[j], Finish=c_j[j]))
 
-# # https://community.plotly.com/t/gantt-chart-resolve-overlap-in-grouped-tasks/38221
-# # 그룹으로 묶어주기 (Machine 1으로) : group_tasks = True  
-# fig = ff.create_gantt(df, index_col = 'Subtask', show_colorbar=True, bar_width=0.2, group_tasks= True)
-# fig.update_layout(xaxis_type='linear')
+# https://community.plotly.com/t/gantt-chart-resolve-overlap-in-grouped-tasks/38221
+# 그룹으로 묶어주기 (Machine 1으로) : group_tasks = True  
+fig = ff.create_gantt(df, index_col = 'Subtask', show_colorbar=True, bar_width=0.2, group_tasks= True)
+fig.update_layout(xaxis_type='linear')
 
-# # 투명도
-# for shape in fig['data']:
-#     shape['opacity'] = 0.6
+# 투명도
+for shape in fig['data']:
+    shape['opacity'] = 0.6
 
 # fig.show()
