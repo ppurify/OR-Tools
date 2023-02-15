@@ -131,4 +131,4 @@ fig.update_layout(xaxis_type='linear')
 for shape in fig['data']:
     shape['opacity'] = 0.6
 
-# fig.show()
+fig.show()
